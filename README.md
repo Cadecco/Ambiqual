@@ -4,10 +4,10 @@ Python implementation of Ambiqual full reference objective model as presented in
 Narbutt M, Skoglund J, Allen A, Chinen M, Barry D, Hines A. AMBIQUAL: Towards a Quality Metric for Headphone Rendered Compressed Ambisonic Spatial Audio. Applied Sciences. 2020; 10(9):3188. https://doi.org/10.3390/app10093188
 
 
-## Installation
-This package can be installed using pip:
+## Setup
+Install the required packages by running:
 
-`pip install git+https://github.com/QxLabIreland/Ambiqual`
+`pip install -r requirements.txt`
 
 ## Usage
 The program can be used using the command line tool:
