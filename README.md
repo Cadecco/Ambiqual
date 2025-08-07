@@ -1,8 +1,7 @@
 # Ambiqual
 Python implementation of Ambiqual full reference objective model as presented in the following paper:
 
-Narbutt M, Skoglund J, Allen A, Chinen M, Barry D, Hines A. AMBIQUAL: Towards a Quality Metric for Headphone Rendered Compressed Ambisonic Spatial Audio. Applied Sciences. 2020; 10(9):3188. https://doi.org/10.3390/app10093188
-
+Davoud Shariat Panah, Andrew Hines, and Susan McKeever. "Exploring wav2vec 2.0 model for heart murmur detection." 2023 31st European Signal Processing Conference (EUSIPCO). IEEE, 2023.
 
 ## Setup
 Install the required packages by running:
@@ -10,51 +9,23 @@ Install the required packages by running:
 `pip install -r requirements.txt`
 
 ## Usage
-The program can be used using the command line tool:
-
-`python -m ambiqual --ref /path/to/dir/reference_signal --deg /path/to/dir/degraded_sginal [--level threshold] [--elc elc] [--ignorefreqbands freq_band]`
-
-## Options
-- `ref` - Reference audio file.
-- `deg` - Degraded audio file.
-- `level` - Intensity binary mask threshold (in dB).
-- `elc` - Equal loudness correction mode:
-  - `0` - No equal loudness correction.
-  - `1` - Equal loudness correction by boosting low and high frequencies.
-  - `2` - Equal loudness correction by attenuating low and high frequencies.
-- `ignorefreqbands` - Specifies high-frequency bands to ignore (range: 0 to 32):
-  - `0` - All 32 frequency bands are considered.
-  - `k` - Ignores from the k-th to the 32nd frequency bands in calculations.
- 
-## Example
-
-The intensity binary map threshold is set to -180dB and equal loudness contours are applied (attenuated low and high-frequency bands):
-
-`python -m ambiqual --ref validation/audiofiles/castanets_fixed_A60_E60_HOA_REF.wav  --deg validation/audiofiles/castanets_fixed_A60_E60_HOA_512k.wav --level -180 --elc 2 --ignorefreqbands 0`
-
-## Validation
-
-To validate Ambiqual, we used ambiqual_test.py script located in the validation directory to run Ambiqual on a set of ambisonic audio files, as used in the paper's experiments. The resulting listening quality and localisation accuracy are then plotted against subjective scores, similar to Figures 11 and 12 in the paper. Note that due to a bug in the original figure plotting script, the scatter plots in Figure 11 of the paper are incorrect and the correct ones are depicted below.
-
-<p align="center">
-  <img src="https://github.com/QxLabIreland/Ambiqual/blob/main/validation/fig11.png" alt="Alt text" width="1000" height="230">
-  <br>
-  <em>Results of experiment 1 (Figure 11 of the paper)</em>
-</p>
-<br><br>
-<p align="center">
-  <img src="https://github.com/QxLabIreland/Ambiqual/blob/main/validation/fig12.png" alt="Alt text" width="1000" height="430">
-  <br>
-  <em>Results of experiment 2 (Figure 12 of the paper)</em>
-</p>
+To preprocess the Digiscope dataset use the `data preparation.ipynb` notebook under data driectory.
+To fine tune and validate the model use `fine_tune.py` under src directory.
+To test the model on test set use `test.py` under src directory.
 
 ## Citation
 
-If you use this code, please cite both the repository and the associated paper:
+If you use this code, please cite the associated paper:
 
-[![DOI](https://zenodo.org/badge/848741719.svg)](https://zenodo.org/doi/10.5281/zenodo.13388476)
-
-Narbutt M, Skoglund J, Allen A, Chinen M, Barry D, Hines A. AMBIQUAL: Towards a Quality Metric for Headphone Rendered Compressed Ambisonic Spatial Audio. Applied Sciences. 2020; 10(9):3188. https://doi.org/10.3390/app10093188
+```bibtex
+@inproceedings{panah2023exploring,
+  title={Exploring wav2vec 2.0 model for heart murmur detection},
+  author={Shariat Panah, Davoud and Hines, Andrew and McKeever, Susan},
+  booktitle={2023 31st European Signal Processing Conference (EUSIPCO)},
+  pages={1010--1014},
+  year={2023},
+  organization={IEEE}
+}
 
 ## Licence
 
