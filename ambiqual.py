@@ -90,9 +90,11 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
     nsim_values = []
     for i in range(16):
         if np.isnan(nsim_values_nan[i]):
+            # In case where the ref and deg signals are both FOA (4 channels), we set the remaining 12 NaN nsim values to 1 
             if n_channels_ref == n_channels_deg:
                 nsim_values.append(1.0)
             else:
+            # In the case where the ref is HOA (16 channels) while the test is FOA (4 channels), we set the remaining 12 NaN nsim values to 0.1
                 nsim_values.append(0.1)
         else:
             nsim_values.append(nsim_values_nan[i])
