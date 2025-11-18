@@ -36,7 +36,7 @@ def load_and_preprocess_signals(ref_path, deg_path):
     ref_sig = np.vstack((zeros_ref, ref_sig))
     deg_sig = np.vstack((zeros_deg, deg_sig))
 
-    return ref_sig, deg_sig, sample_rate, n_channels_deg
+    return ref_sig, deg_sig, sample_rate, n_channels_ref, n_channels_deg
 
 
 def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq_bands):
@@ -59,7 +59,7 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
         tuple: List of NSIM values, LQ, LA values.
     """
 
-    ref_sig, deg_sig, sample_rate, n_channels = load_and_preprocess_signals(ref_path, deg_path)
+    ref_sig, deg_sig, sample_rate, n_channels_ref, n_channels_deg = load_and_preprocess_signals(ref_path, deg_path)
 
     nsim_values = []
     nsim_values_nan = []
@@ -90,7 +90,10 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
     nsim_values = []
     for i in range(16):
         if np.isnan(nsim_values_nan[i]):
-            nsim_values.append(0.1)
+            if n_channels_ref == n_channels_deg:
+                nsim_values.append(1.0)
+            else:
+                nsim_values.append(0.1)
         else:
             nsim_values.append(nsim_values_nan[i])
 
