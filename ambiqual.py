@@ -18,23 +18,36 @@ def load_and_preprocess_signals(ref_path, deg_path):
         tuple: Processed reference signal, degraded signal, sample rate, and number of channels.
     """
 
-    # reading reference and degraded audio files
     ref_sig, sample_rate = sf.read(str(ref_path))
-    deg_sig, _ = sf.read(str(deg_path))
+    deg_sig, sample_rate_deg = sf.read(str(deg_path))
+
+    # Get first 4 channels of prediction to convert to FOA
+    # ref_sig = ref_sig[:, [0,2,3,1]]
+    # deg_sig = deg_sig[:, :4]
+    # deg_sig = deg_sig[:, [0,2,3,1]]
+
+    # Ensure 2D (N, C)
+    if ref_sig.ndim == 1:
+        ref_sig = ref_sig[:, None]
+    if deg_sig.ndim == 1:
+        deg_sig = deg_sig[:, None]
+
+    # Sample-rate sanity check
+    if sample_rate_deg != sample_rate:
+        raise ValueError(f"Sample rates differ: ref={sample_rate} Hz, deg={sample_rate_deg} Hz")
 
     n_channels_ref = ref_sig.shape[1]
     n_channels_deg = deg_sig.shape[1]
 
-    # Number of samples to append
+    # Prepend zeros
     num_zeros = 11520
+    ref_sig = np.vstack((np.zeros((num_zeros, n_channels_ref)), ref_sig))
+    deg_sig = np.vstack((np.zeros((num_zeros, n_channels_deg)), deg_sig))
 
-    # Create an array of zeros with shape (11520, number of channels)
-    zeros_ref = np.zeros((num_zeros, n_channels_ref))
-    zeros_deg = np.zeros((num_zeros, n_channels_deg))
-
-    # Concatenate the zeros array with the original signals
-    ref_sig = np.vstack((zeros_ref, ref_sig))
-    deg_sig = np.vstack((zeros_deg, deg_sig))
+    # IMPORTANT: force equal length so TF representations align
+    n = min(ref_sig.shape[0], deg_sig.shape[0])
+    ref_sig = ref_sig[:n, :]
+    deg_sig = deg_sig[:n, :]
 
     return ref_sig, deg_sig, sample_rate, n_channels_ref, n_channels_deg
 
@@ -60,6 +73,8 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
     """
 
     ref_sig, deg_sig, sample_rate, n_channels_ref, n_channels_deg = load_and_preprocess_signals(ref_path, deg_path)
+    
+    n_channels = min(n_channels_ref, n_channels_deg) # Added this code to only process the minimum number of channels
 
     nsim_values = []
     nsim_values_nan = []
