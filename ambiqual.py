@@ -22,9 +22,11 @@ def load_and_preprocess_signals(ref_path, deg_path):
     deg_sig, sample_rate_deg = sf.read(str(deg_path))
 
     # Get first 4 channels of prediction to convert to FOA
-    # ref_sig = ref_sig[:, [0,2,3,1]]
-    # deg_sig = deg_sig[:, :4]
-    # deg_sig = deg_sig[:, [0,2,3,1]]
+    ref_sig = ref_sig[:, [0,2,3,1]]
+    print("BEFORE slice:", ref_sig.shape, deg_sig.shape)
+    deg_sig = deg_sig[:, :4]
+    print("AFTER slice:", ref_sig.shape, deg_sig.shape)
+    deg_sig = deg_sig[:, [0,2,3,1]]
 
     # Ensure 2D (N, C)
     if ref_sig.ndim == 1:
@@ -45,9 +47,13 @@ def load_and_preprocess_signals(ref_path, deg_path):
     deg_sig = np.vstack((np.zeros((num_zeros, n_channels_deg)), deg_sig))
 
     # IMPORTANT: force equal length so TF representations align
-    n = min(ref_sig.shape[0], deg_sig.shape[0])
-    ref_sig = ref_sig[:n, :]
-    deg_sig = deg_sig[:n, :]
+    # deg is delayed -> advance it
+    deg_sig = deg_sig[512:, :]
+
+    # Now trim to GT length
+    n = min(len(ref_sig), len(deg_sig))
+    ref_sig = ref_sig[:n]
+    deg_sig = deg_sig[:n]
 
     return ref_sig, deg_sig, sample_rate, n_channels_ref, n_channels_deg
 
@@ -108,8 +114,11 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
             # In case where the ref and deg signals are both FOA (4 channels), we set the remaining 12 NaN nsim values to 1 
             if n_channels_ref == n_channels_deg:
                 nsim_values.append(1.0)
+            elif n_channels_ref < n_channels_deg:
+                # ref has fewer channels (FOA ref, HOA pred) -> ignore extra pred channels
+                nsim_values.append(1.0)
             else:
-            # In the case where the ref is HOA (16 channels) while the test is FOA (4 channels), we set the remaining 12 NaN nsim values to 0.1
+                # ref has more channels (HOA ref, FOA pred) -> penalize missing channels
                 nsim_values.append(0.1)
         else:
             nsim_values.append(nsim_values_nan[i])
@@ -124,7 +133,8 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
             (nsim_values[2] ** chi) * (nsim_values[6] ** psi) *
             (nsim_values[2] ** omega)
     )
-
+    
+    print("vNSIM W,Y,Z,X =", nsim_values_nan[:4])
     return nsim_values_nan, LQ, LA
 
 
