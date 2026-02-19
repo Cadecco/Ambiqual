@@ -5,6 +5,9 @@ from argparse import ArgumentParser
 from pathlib import Path
 import warnings
 
+from scipy.signal import correlate
+import matplotlib.pyplot as plt
+
 
 def load_and_preprocess_signals(ref_path, deg_path):
     """
@@ -20,6 +23,41 @@ def load_and_preprocess_signals(ref_path, deg_path):
 
     ref_sig, sample_rate = sf.read(str(ref_path))
     deg_sig, sample_rate_deg = sf.read(str(deg_path))
+
+    ref_ch = ref_sig[:, 0]  # shape (720000,)
+    deg_ch  = deg_sig[:, 0]   # shape (719872,)
+
+    corr = correlate(ref_ch, deg_ch, mode='full')
+    best_idx = np.argmax(np.abs(corr))
+    best_lag = best_idx - (len(deg_ch) - 1)
+
+    print(f"Correlation: {corr}")
+    print(f"Best lag: {best_lag} samples ({best_lag / sample_rate * 1000:.2f} ms)")
+
+    n = min(len(ref_sig), len(deg_sig))
+    ref_plot = ref_sig[:n, 0]
+    gt_plot  = deg_sig[:n, 0]
+
+    # Plot a short window — e.g. 0.1s at 48kHz = 4800 samples
+    window = 4800
+
+    fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+
+    # Start of signal
+    axes[0].plot(ref_plot[:window], label='groundtruth', alpha=0.7)
+    axes[0].plot(gt_plot[:window],  label='resynth',  alpha=0.7)
+    axes[0].set_title('Start of signal (first 0.1s)')
+    axes[0].legend()
+
+    # Middle of signal — check alignment holds throughout
+    mid = n // 2
+    axes[1].plot(ref_plot[mid:mid+window], label='groundtruth', alpha=0.7)
+    axes[1].plot(gt_plot[mid:mid+window],  label='resynth',  alpha=0.7)
+    axes[1].set_title('Middle of signal')
+    axes[1].legend()
+
+    plt.tight_layout()
+    plt.show()
 
     # Get first 4 channels of prediction to convert to FOA
     ref_sig = ref_sig[:, [0,2,3,1]]
@@ -48,9 +86,9 @@ def load_and_preprocess_signals(ref_path, deg_path):
 
     # IMPORTANT: force equal length so TF representations align
     # deg is delayed -> advance it
-    deg_sig = deg_sig[512:, :]
+    #deg_sig = deg_sig[128:, :]
 
-    # Now trim to GT length
+    # Now trim to ref or GT length
     n = min(len(ref_sig), len(deg_sig))
     ref_sig = ref_sig[:n]
     deg_sig = deg_sig[:n]
