@@ -24,47 +24,48 @@ def load_and_preprocess_signals(ref_path, deg_path):
     ref_sig, sample_rate = sf.read(str(ref_path))
     deg_sig, sample_rate_deg = sf.read(str(deg_path))
 
-    ref_ch = ref_sig[:, 0]  # shape (720000,)
-    deg_ch  = deg_sig[:, 0]   # shape (719872,)
+    # ref_ch = ref_sig[:, 0]  # shape (720000,)
+    # deg_ch  = deg_sig[:, 0]   # shape (719872,)
 
-    corr = correlate(ref_ch, deg_ch, mode='full')
-    best_idx = np.argmax(np.abs(corr))
-    best_lag = best_idx - (len(deg_ch) - 1)
+    # corr = correlate(ref_ch, deg_ch, mode='full')
+    # best_idx = np.argmax(np.abs(corr))
+    # best_lag = best_idx - (len(deg_ch) - 1)
 
-    print(f"Correlation: {corr}")
-    print(f"Best lag: {best_lag} samples ({best_lag / sample_rate * 1000:.2f} ms)")
+    # print(f"Correlation: {corr}")
+    # print(f"Best lag: {best_lag} samples ({best_lag / sample_rate * 1000:.2f} ms)")
 
-    n = min(len(ref_sig), len(deg_sig))
-    ref_plot = ref_sig[:n, 0]
-    gt_plot  = deg_sig[:n, 0]
+    # n = min(len(ref_sig), len(deg_sig))
+    # ref_plot = ref_sig[:n, 1]
+    # deg_plot  = deg_sig[:n, 1]
 
     # Plot a short window — e.g. 0.1s at 48kHz = 4800 samples
     window = 4800
+    start = 24000
 
-    fig, axes = plt.subplots(2, 1, figsize=(12, 6))
+    #fig, axes = plt.subplots(2, 1, figsize=(12, 6))
 
-    # Start of signal
-    axes[0].plot(ref_plot[:window], label='groundtruth', alpha=0.7)
-    axes[0].plot(gt_plot[:window],  label='resynth',  alpha=0.7)
-    axes[0].set_title('Start of signal (first 0.1s)')
-    axes[0].legend()
+    # # Start of signal
+    # axes[0].plot(ref_plot[start:start+window], label='groundtruth', alpha=0.7)
+    # axes[0].plot(deg_plot[start:start+window],  label='resynth',  alpha=0.7)
+    # axes[0].set_title('Start of signal (first 0.1s)')
+    # axes[0].legend()
 
-    # Middle of signal — check alignment holds throughout
-    mid = n // 2
-    axes[1].plot(ref_plot[mid:mid+window], label='groundtruth', alpha=0.7)
-    axes[1].plot(gt_plot[mid:mid+window],  label='resynth',  alpha=0.7)
-    axes[1].set_title('Middle of signal')
-    axes[1].legend()
+    # # Middle of signal — check alignment holds throughout
+    # mid = n // 2
+    # axes[1].plot(ref_plot[mid:mid+window], label='groundtruth', alpha=0.7)
+    # axes[1].plot(deg_plot[mid:mid+window],  label='resynth',  alpha=0.7)
+    # axes[1].set_title('Middle of signal')
+    # axes[1].legend()
 
-    plt.tight_layout()
-    plt.show()
+    # plt.tight_layout()
+    # plt.show()
 
     # Get first 4 channels of prediction to convert to FOA
-    ref_sig = ref_sig[:, [0,2,3,1]]
-    print("BEFORE slice:", ref_sig.shape, deg_sig.shape)
-    deg_sig = deg_sig[:, :4]
-    print("AFTER slice:", ref_sig.shape, deg_sig.shape)
-    deg_sig = deg_sig[:, [0,2,3,1]]
+    #ref_sig = ref_sig[:, [0,2,3,1]]
+    #print("BEFORE slice:", ref_sig.shape, deg_sig.shape)
+    #deg_sig = deg_sig[:, :4]
+    #print("AFTER slice:", ref_sig.shape, deg_sig.shape)
+    #deg_sig = deg_sig[:, [0,2,3,1]]
 
     # Ensure 2D (N, C)
     if ref_sig.ndim == 1:
@@ -172,7 +173,7 @@ def calculate_ambiqual(ref_path, deg_path, intensity_threshold, elc, ignore_freq
             (nsim_values[2] ** omega)
     )
     
-    print("vNSIM W,Y,Z,X =", nsim_values_nan[:4])
+    #print("vNSIM W,Y,Z,X =", nsim_values_nan[:4])
     return nsim_values_nan, LQ, LA
 
 
@@ -238,6 +239,6 @@ if __name__ == '__main__':
                                             )
 
     # print("vnsim", nsim_values)
-    print("")
-    print("LQ: ", LQ)
-    print("LA: ", LA)
+    #print("")
+    #print("LQ: ", LQ)
+    #print("LA: ", LA)
